@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react"
+import { useState, type FormEvent } from "react"
 import { ArrowRight, Clock3, LogIn } from "lucide-react"
 
 import { Button } from "@workspace/ui/components/button"
@@ -33,8 +33,12 @@ export function LoginPage({ users, onLogin, onShowSignup }: LoginPageProps) {
       return
     }
 
-    const { password: _password, ...authUser } = user
-    onLogin(authUser)
+    onLogin({
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role,
+    })
   }
 
   return (
@@ -126,4 +130,3 @@ export function LoginPage({ users, onLogin, onShowSignup }: LoginPageProps) {
     </main>
   )
 }
-

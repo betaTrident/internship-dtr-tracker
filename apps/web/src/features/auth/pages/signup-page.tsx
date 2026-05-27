@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react"
+import { useState, type FormEvent } from "react"
 import { Check, Clock3, GraduationCap, ShieldCheck, UserPlus } from "lucide-react"
 
 import { Button } from "@workspace/ui/components/button"
@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/componen
 import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
 
-import type { AuthUser, StoredAuthUser } from "@/features/auth/types"
+import type { StoredAuthUser } from "@/features/auth/types"
 import type { Role } from "@/features/dtr"
 
 type SignupPageProps = {
@@ -187,4 +187,3 @@ export function SignupPage({ users, onSignup, onShowLogin }: SignupPageProps) {
     </main>
   )
 }
-

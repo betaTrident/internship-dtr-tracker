@@ -151,8 +151,12 @@ export function App() {
     localStorage.setItem(AUTH_USERS_STORAGE_KEY, JSON.stringify(nextUsers))
     setAuthUsers(nextUsers)
 
-    const { password: _password, ...authUser } = user
-    setAuthenticatedUser(authUser)
+    setAuthenticatedUser({
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role,
+    })
   }
 
   function signOut() {
