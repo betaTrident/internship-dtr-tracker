@@ -196,7 +196,7 @@ export function App() {
           onProfileChange={updateActiveProfile}
         />
       ) : null}
-      {role === "supervisorr" ? (
+      {role === "supervisor" ? (
         <SupervisorPage
           profiles={profiles}
           entries={entries}
