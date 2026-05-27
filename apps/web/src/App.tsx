@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react"
 
+import { LoginPage, SignupPage, type AuthUser, type StoredAuthUser } from "@/features/auth"
 import {
   AppHeader,
   AdminPage,
@@ -16,6 +17,8 @@ import {
 } from "@/features/dtr"
 
 const PROFILE_STORAGE_KEY = "internship-dtr-profiles"
+const AUTH_USERS_STORAGE_KEY = "internship-dtr-auth-users"
+const AUTH_SESSION_STORAGE_KEY = "internship-dtr-auth-session"
 
 function normalizeStoredProfile(profile: InternProfile) {
   const normalizedStartDate =
@@ -54,8 +57,47 @@ function getInitialProfiles() {
   return [initialProfile]
 }
 
+function getInitialAuthUsers() {
+  const storedUsers = localStorage.getItem(AUTH_USERS_STORAGE_KEY)
+
+  if (!storedUsers) {
+    return []
+  }
+
+  try {
+    const parsedUsers = JSON.parse(storedUsers) as StoredAuthUser[]
+
+    if (Array.isArray(parsedUsers)) {
+      return parsedUsers
+    }
+  } catch {
+    localStorage.removeItem(AUTH_USERS_STORAGE_KEY)
+  }
+
+  return []
+}
+
+function getInitialSession() {
+  const storedSession = localStorage.getItem(AUTH_SESSION_STORAGE_KEY)
+
+  if (!storedSession) {
+    return null
+  }
+
+  try {
+    return JSON.parse(storedSession) as AuthUser
+  } catch {
+    localStorage.removeItem(AUTH_SESSION_STORAGE_KEY)
+  }
+
+  return null
+}
+
 export function App() {
-  const [role, setRole] = useState<Role>("intern")
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login")
+  const [authUsers, setAuthUsers] = useState<StoredAuthUser[]>(getInitialAuthUsers)
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(getInitialSession)
+  const [role, setRole] = useState<Role>(currentUser?.role ?? "intern")
   const [profiles, setProfiles] = useState<InternProfile[]>(getInitialProfiles)
   const [settings, setSettings] = useState<SystemSettings>(initialSettings)
   const [entries, setEntries] = useState<DtrEntry[]>(initialDtrEntries)
@@ -98,12 +140,52 @@ export function App() {
     )
   }
 
+  function setAuthenticatedUser(user: AuthUser) {
+    localStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(user))
+    setCurrentUser(user)
+    setRole(user.role)
+  }
+
+  function signupUser(user: StoredAuthUser) {
+    const nextUsers = [...authUsers, user]
+    localStorage.setItem(AUTH_USERS_STORAGE_KEY, JSON.stringify(nextUsers))
+    setAuthUsers(nextUsers)
+
+    const { password: _password, ...authUser } = user
+    setAuthenticatedUser(authUser)
+  }
+
+  function signOut() {
+    localStorage.removeItem(AUTH_SESSION_STORAGE_KEY)
+    setCurrentUser(null)
+    setRole("intern")
+    setAuthMode("login")
+  }
+
+  if (!currentUser) {
+    return authMode === "login" ? (
+      <LoginPage
+        users={authUsers}
+        onLogin={setAuthenticatedUser}
+        onShowSignup={() => setAuthMode("signup")}
+      />
+    ) : (
+      <SignupPage
+        users={authUsers}
+        onSignup={signupUser}
+        onShowLogin={() => setAuthMode("login")}
+      />
+    )
+  }
+
   return (
     <div className="min-h-svh bg-muted/30 text-foreground">
       <AppHeader
         role={role}
         title={settings.systemTitle}
+        userName={currentUser.fullName}
         onRoleChange={setRole}
+        onSignOut={signOut}
       />
       {role === "intern" ? (
         <InternPage

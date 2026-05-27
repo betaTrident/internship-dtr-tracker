@@ -2,6 +2,7 @@ import {
   ClipboardCheck,
   Clock3,
   GraduationCap,
+  LogOut,
   Moon,
   ShieldCheck,
   Sun,
@@ -15,7 +16,9 @@ import type { Role } from "@/features/dtr/types"
 type AppHeaderProps = {
   role: Role
   title: string
+  userName?: string
   onRoleChange: (role: Role) => void
+  onSignOut?: () => void
 }
 
 const roleOptions = [
@@ -24,7 +27,13 @@ const roleOptions = [
   { value: "admin", label: "Admin", icon: ShieldCheck },
 ] satisfies { value: Role; label: string; icon: typeof GraduationCap }[]
 
-export function AppHeader({ role, title, onRoleChange }: AppHeaderProps) {
+export function AppHeader({
+  role,
+  title,
+  userName,
+  onRoleChange,
+  onSignOut,
+}: AppHeaderProps) {
   const { theme, setTheme } = useTheme()
   const isDark = theme === "dark"
 
@@ -38,7 +47,7 @@ export function AppHeader({ role, title, onRoleChange }: AppHeaderProps) {
           <div>
             <h1 className="text-lg font-semibold">{title || "Internship DTR Tracker"}</h1>
             <p className="text-sm text-muted-foreground">
-              Customizable attendance, approval, and export workspace
+              {userName ? `Signed in as ${userName}` : "Customizable attendance, approval, and export workspace"}
             </p>
           </div>
         </div>
@@ -66,6 +75,12 @@ export function AppHeader({ role, title, onRoleChange }: AppHeaderProps) {
             {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
             {isDark ? "Light" : "Dark"}
           </Button>
+          {onSignOut ? (
+            <Button variant="outline" onClick={onSignOut}>
+              <LogOut className="size-4" />
+              Sign out
+            </Button>
+          ) : null}
         </div>
       </div>
     </header>
